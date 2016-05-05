@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zhaogang.demo.dao.TestMapper">
+    <resultMap id="TestResultMap" type="Test">
+        <result column="TEST_ID" property="testId" jdbcType="VARCHAR" javaType="string"/>
+        <result column="TEST_NAME" property="testName" jdbcType="VARCHAR" javaType="string"/>
+        <result column="TEST_AGE" property="testAge" jdbcType="INTEGER" javaType="integer"/>
+        <result column="TEST_BRITHDAY" property="testBrithday" jdbcType="DATE" javaType="date"/>
+        <result column="CREATE_TIME" property="createTime" jdbcType="DATE" javaType="date"/>
+        <result column="LAST_MODIFY_TIME" property="lastModifyTime" jdbcType="DATE" javaType="date"/>
+    </resultMap>
+
+	<sql id="TestColumns">
+		TEST_ID,TEST_NAME,TEST_AGE,TEST_BRITHDAY,CREATE_TIME,LAST_MODIFY_TIME
+	</sql>
+
+	<insert id="add" parameterType="Test">
+		insert into T_TEST
+		(
+		  TEST_ID,TEST_NAME,TEST_AGE,TEST_BRITHDAY,CREATE_TIME,LAST_MODIFY_TIME
+		)
+		values
+		(
+		  #{testId, jdbcType=VARCHAR, javaType=string},
+		  #{testName, jdbcType=VARCHAR, javaType=string},
+		  #{testAge, jdbcType=INTEGER, javaType=integer},
+		  #{testBrithday, jdbcType=DATE, javaType=date},
+		  current_timestamp,
+		  current_timestamp
+		)
+	</insert>
+
+	<delete id="delete" parameterType="string">
+		delete from 
+		    T_TEST
+		where
+		    TEST_ID = #{testId, jdbcType=VARCHAR, javaType=string}
+	</delete>
+
+	<update id="update" parameterType="Test">
+	    update 
+	        T_TEST
+	    set 
+            TEST_NAME = #{testName, jdbcType=VARCHAR, javaType=string},
+            TEST_AGE = #{testAge, jdbcType=INTEGER, javaType=integer},
+            TEST_BRITHDAY = #{testBrithday, jdbcType=DATE, javaType=date},
+            LAST_MODIFY_TIME = current_timestamp
+        where
+	        TEST_ID = #{testId, jdbcType=VARCHAR, javaType=string}            
+	</update>
+
+    <select id="get" resultMap="TestResultMap">
+        select 
+            <include refid="TestColumns" />
+        from 
+            T_TEST
+    </select>
+
+    <select id="getByTestId" resultMap="TestResultMap">
+        select 
+            <include refid="TestColumns" />
+        from 
+            T_TEST
+        where
+            TEST_ID = #{testId, jdbcType=VARCHAR, javaType=string}
+    </select>
+</mapper>

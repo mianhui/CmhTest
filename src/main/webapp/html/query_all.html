@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>查询所有</title>
+    <link rel="stylesheet" type="text/css" href="../easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.10.4.custom.min.css" />
+    <link rel="stylesheet" type="text/css" href="../easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../easyui/css/demo.css">
+    <script type="text/javascript" src="../js/jquery-1.8.0.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript" src="../easyui/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.blockUI.js"></script>
+    <style type="text/css">
+        .ui-widget-header { border: 1px solid #aaaaaa; background-color:#E6EFFF; color: #222222; font-weight: bold; }
+    </style>
+    <script>
+        function isNumber(target){
+            return (/^\d+(\.\d+)?$/).test(target);
+        }
+
+        function registerCheck() {
+            var checkFlag = true;
+
+            $('#register_testId_msg').html("");
+            $('#register_testName_msg').html("");
+            $('#register_testAge_msg').html("");
+            $('#register_testBrithday_msg').html("");
+
+            if ($.trim($('#register_testId').val()) == "") {
+                $('#register_testId_msg').html("ID为空或不合法");
+                checkFlag = false;
+            }
+            if ($.trim($('#register_testName').val()) == "") {
+                $('#register_testName_msg').html("姓名为空或不合法");
+                checkFlag = false;
+            }
+            if ($.trim($('#register_testAge').val()) == "" || !isNumber($('#register_testAge').val())) {
+                $('#register_testAge_msg').html("年龄为空或不合法");
+                checkFlag = false;
+            }
+            if ($.trim($('#register_testBrithday').val()) == "") {
+                $('#register_testBrithday_msg').html("生日为空或不合法");
+                checkFlag = false;
+            }
+
+            return checkFlag;
+        }
+
+        function changeCheck() {
+            var checkFlag = true;
+
+            $('#register_testName_msg').html("");
+            $('#register_testAge_msg').html("");
+            $('#register_testBrithday_msg').html("");
+
+            if ($.trim($('#change_testName').val()) == "") {
+                $('#change_testName_msg').html("姓名为空或不合法");
+                checkFlag = false;
+            }
+            if ($.trim($('#change_testAge').val()) == "" || !isNumber($('#change_testAge').val())) {
+                $('#change_testAge_msg').html("年龄为空或不合法");
+                checkFlag = false;
+            }
+            if ($.trim($('#change_testBrithday').val()) == "") {
+                $('#change_testBrithday_msg').html("生日为空或不合法");
+                checkFlag = false;
+            }
+
+            return checkFlag;
+        }
+    
+        $(function(){
+        	$('#register_testBrithday').datepicker();
+        	$('#change_testBrithday').datepicker();
+        	
+            $('#test').datagrid({
+                title: '查询结果',
+                iconCls: 'icon-save',
+                width:850,
+                height:350,
+                sortName: 'createTime',
+                sortOrder: 'asc',
+                pagination: true,
+                url:'/Demo/queryAll.htm',
+                singleSelect: true,
+                columns:[[
+                    {field:'testId', title:'编号', width:150},
+                    {field:'testName', title:'姓名', width:150},
+                    {field:'testAge', title:'年龄', width:150},
+                    {field:'testBrithday', title:'生日', width:150,
+                        formatter:function(value, row, index){  
+                            return $.datepicker.formatDate('mm/dd/yy', new Date(value));  
+                        },
+                        editor: 'text'
+                    },
+                    {field:'createTime', title:'注册日期', width:150, 
+                        formatter:function(value, row, index){  
+                            return $.datepicker.formatDate('mm/dd/yy', new Date(value));   
+                        }
+                    }
+                ]],
+                pagination:true,
+                rownumbers:true,
+                toolbar:[{
+                    id:'btnadd',
+                    text:'Add',
+                    iconCls:'icon-add',
+                    handler:function(){
+                        $('#registerDiv').dialog('open');
+                    }
+                },{
+                    id:'btncut',
+                    text:'Cut',
+                    iconCls:'icon-cut',
+                    handler:function(){
+                        var row = $('#test').datagrid('getSelected');
+                        if (row){
+                            $.ajax({
+                                url: "/Demo/delete.htm",
+                                data: {
+                                    testId: row.testId
+                                },
+                                dataType: 'json',
+                                type: 'POST',
+                                success: function(data){
+                                    $('#test').datagrid('reload');
+                                },
+                                error: function() {
+                                    $('#test').datagrid('reload');
+                                }
+                           });                           
+                        }
+                    }
+                }],
+                onDblClickRow: function(rowIndex, rowData) {
+                    $('#testId').html(rowData.testId);
+                    $('#change_testId').val(rowData.testId);
+                    $('#change_testName').val(rowData.testName);
+                    $('#change_testAge').val(rowData.testAge);
+                    $('#change_testBrithday').val(rowData.testBrithday);
+                    $('#change_testBrithday').val($.datepicker.formatDate('mm/dd/yy', new Date(rowData.testBrithday)));
+                    $('#changeDiv').dialog('open');
+                }
+            });
+            var p = $('#test').datagrid('getPager');
+            $(p).pagination({ 
+                pageSize: 10,
+                pageList: [5,10,15], 
+                beforePageText: '第', 
+                afterPageText: '页    共 {pages} 页', 
+                displayMsg: '当前显示 {from} - {to} 条记录   共 {total} 条记录',
+            }); 
+        });
+
+        function register() {
+            if (registerCheck()) {
+                var registerDialog = $('#registerDiv').parent();
+                registerDialog.block({
+                  message: '<img src="../css/ajax_loader.gif" height="30%" width="30%"/>',
+                  css: { backgroundColor: null,border: null}
+                });
+
+                $.ajax({
+                    url:"/Demo/register.htm",
+                    data:$("#registerForm").serialize(),
+                    dataType:'json',
+                    type:'POST',
+                    success:function(data){
+                        registerDialog.unblock();
+                        if($.trim(data)=="SUCCESS"){
+                            $('#registerDiv').dialog('close');
+                            $('#test').datagrid('reload');
+                        }
+                    },
+                    error:function() {
+                        registerDialog.unblock();
+                        $('#registerDiv').dialog('close');
+                        $('#test').datagrid('reload');
+                    }
+               });
+            }
+        }
+
+        function change() {
+            if (changeCheck()) {
+                var changeDialog = $('#changeDiv').parent();
+                changeDialog.block({
+                  message: '<img src="../css/ajax_loader.gif" height="30%" width="30%"/>',
+                  css: { backgroundColor: null,border: null}
+                });
+
+                $.ajax({
+                    url:"/Demo/change.htm",
+                    data:$("#changeForm").serialize(),
+                    dataType:'json',
+                    type:'POST',
+                    success:function(data){
+                        changeDialog.unblock();
+                        if($.trim(data)=="SUCCESS"){
+                            $('#changeDiv').dialog('close');
+                            $('#test').datagrid('reload');
+                        }
+                    },
+                    error:function() {
+                        changeDialog.unblock();
+                        $('#changeDiv').dialog('close');
+                        $('#test').datagrid('reload');
+                    }
+               });
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>查询所有</h2>
+    
+    <table id="test"></table>
+    
+    <!-- 注册 -->
+    <div id="registerDiv" class="easyui-dialog" title="注册" style="width:300px;height:auto;text-align: center;"
+         data-options="iconCls:'icon-add',resizable:true,modal:true,closed:true">
+        <form id="registerForm" > 
+        <table style="margin:5px auto 5px auto; text-align: left;">
+            <tr>
+                <td>ID<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="register_testId" name="testId"  /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="register_testId_msg"></span></td>
+            </tr>
+            <tr>
+                <td>姓名<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="register_testName" name="testName" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="register_testName_msg"></span></td>
+            </tr>
+            <tr>
+                <td>年龄<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="register_testAge" name="testAge" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="register_testAge_msg"></span></td>
+            </tr>
+            <tr>
+                <td>生日<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="register_testBrithday" name="testBrithday" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="register_testBrithday_msg"></span></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                <a href="#" class="easyui-linkbutton" onclick="register()" data-options="iconCls:'icon-ok'">&nbsp;&nbsp;确定&nbsp;&nbsp;</a>
+                &nbsp;&nbsp;
+                <a href="#" class="easyui-linkbutton" onclick="javascript:$('#registerDiv').dialog('close');" data-options="iconCls:'icon-no'">&nbsp;&nbsp;取消&nbsp;&nbsp;</a>
+                </td>
+            </tr>
+        </table>
+        </form>
+    </div>
+
+    <!-- 修改  -->
+    <div id="changeDiv" class="easyui-dialog" title="修改" style="width:300px;height:auto;text-align: center;"
+         data-options="iconCls:'icon-add',resizable:true,modal:true,closed:true">
+        <form id="changeForm" > 
+        <table style="margin:5px auto 5px auto; text-align: left;">
+            <tr>
+                <td>ID</td>
+                <td id="testId">
+                </td>
+                <input type="hidden" id="change_testId" name="testId" />
+            </tr>
+            <tr>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td>姓名<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="change_testName" name="testName" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="change_testName_msg"></span></td>
+            </tr>
+            <tr>
+                <td>年龄<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="change_testAge" name="testAge" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="change_testAge_msg"></span></td>
+            </tr>
+            <tr>
+                <td>生日<font color="red">*</font></td>
+                <td><input type="text" class="easyui-textbox" id="change_testBrithday" name="testBrithday" /></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td><td><span style="color:red;" id="change_testBrithday_msg"></span></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                <a href="#" class="easyui-linkbutton" onclick="change()" data-options="iconCls:'icon-ok'">&nbsp;&nbsp;确定&nbsp;&nbsp;</a>
+                &nbsp;&nbsp;
+                <a href="#" class="easyui-linkbutton" onclick="javascript:$('#changeDiv').dialog('close');" data-options="iconCls:'icon-no'">&nbsp;&nbsp;取消&nbsp;&nbsp;</a>
+                </td>
+            </tr>
+        </table>
+        </form>
+    </div>
+</body>
+</html>

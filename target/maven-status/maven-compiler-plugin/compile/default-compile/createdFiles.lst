@@ -1,0 +1,5 @@
+com\zhaogang\demo\formbean\RegisterFormbean.class
+com\zhaogang\demo\model\Test.class
+com\zhaogang\demo\dao\TestMapper.class
+com\zhaogang\demo\controller\TestController.class
+com\zhaogang\demo\formbean\ChangeFormbean.class
