@@ -5,7 +5,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 /**
  * 修改表单Bean
  * 
- * @author 程凯
+ * @author 陈绵慧
  * @since 2015年11月17日
  * @version 1.0
  */
