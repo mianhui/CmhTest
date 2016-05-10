@@ -10,6 +10,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @author 陈绵慧
  * @since 2016年05月10日
  * @version 1.0
+ * cmhV1.0.2
  */
 public class Test {
 
