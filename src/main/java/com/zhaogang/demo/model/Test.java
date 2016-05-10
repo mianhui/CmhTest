@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 测试实体
  * 
  * @author 陈绵慧
- * @since 2015年11月17日
+ * @since 2016年05月10日
  * @version 1.0
  */
 public class Test {
